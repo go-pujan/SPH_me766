@@ -364,8 +364,9 @@ int main()
     }
     saveCheckpoint("final", output_dir, x, v, r, p);
     
-    double end = (clock() - start) / double (CLOCKS_PER_SEC)*1000;
-    cout<< end  ;
+    double end = clock();
+    double elapsed_time = (end-start)/ CLOCKS_PER_SEC;
+    cout<< elapsed_time ;
 
 
 }
