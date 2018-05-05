@@ -382,16 +382,25 @@ int main()
     set_ic(x, xw, v, vw, r, rw, dx, box_size_x, box_size_y);
 
     //Call functions directly
-    for (int i=0; i<numpts; i++){
-    	UPDATE_POS(i, x, v, r, m, h, numpts, dt);
-    	SUMDEN(i, x, xw, r, m, h, numpts, Nw);
-    	DEN(i, x, xw, v, vw, r, rw, m, h, dt, numpts, Nw);
-    	INCOMP_P(i, r, p, c0, rho0);
-    	UPDATE_VEL(i, x, xw, p, pw, v, vw, r, rw, m, numpts, Nw, dt, h);
-    	WALL(i, x, xw, v, vw, p, pw, rw, h, rho0, c0, Nw);
-        saveCheckpoint(to_string(i), output_dir, x, v, r, p);
-	}
-	saveCheckpoint("final", output_dir, x, v, r, p);
+    for(int j=0; j<numrep; j++)
+    {
+        //cout<<"Loop iteration start: "<<j<<": "<<x[0][0]<<endl;
+        for (int i=0; i<numpts; i++){
+            UPDATE_POS(i, x, v, r, m, h, numpts, dt);
+            SUMDEN(i, x, xw, r, m, h, numpts, Nw);
+            DEN(i, x, xw, v, vw, r, rw, m, h, dt, numpts, Nw);
+            INCOMP_P(i, r, p, c0, rho0);
+            UPDATE_VEL(i, x, xw, p, pw, v, vw, r, rw, m, numpts, Nw, dt, h);
+        }
+
+        for(int k=0; k<Nw; k++){
+            WALL(k, x, xw, v, vw, p, pw, rw, h, rho0, c0, Nw);
+        }
+
+        saveCheckpoint(to_string(j), output_dir, x, v, r, p); 
+        //cout<<"Loop iteration end: "<<j<<": "<<x[0][0]<<endl;   
+    }
+    saveCheckpoint("final", output_dir, x, v, r, p);
 
 
 }
