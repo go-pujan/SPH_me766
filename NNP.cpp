@@ -22,8 +22,46 @@ float distance(float a[], float b[])
     dist = pow((A+B),0.5);
     return dist;
 }
- 
-// A structure to represent node of kd tree
+
+void set_ic(vector<vector<float> > &x, vector<vector<float> > &xw, vector<vector<float> > &v,
+            vector<vector<float> > &vw, vector<float> &r, vector<float> &rw,
+            float dx, float box_size_x, float box_size_y)
+{
+    uniform_real_distribution <double> randx(0,box_size_x);
+    uniform_real_distribution <double> randy(0,box_size_y);
+    uniform_real_distribution <double> rvx(1, -1);
+    uniform_real_distribution <double> rvy(1, -1);
+    default_random_engine rex, rey, revx, revy;
+    rex.seed(time(NULL));
+    rey.seed(time(NULL));
+    revx.seed(time(NULL));
+    revy.seed(time(NULL));
+
+    for (int i=0; i < x.size(); i++)
+    {
+        /* x[i].s[0] = i * dx; */
+        /* x[i].s[1] = i * dx; */
+        v[i][0] = 0;
+        v[i][1] = 0;
+        x[i][0] = randx(rex);
+        x[i][1] = randy(rey);
+        /* v[i].s[0] = rvx(revx); */
+        /* v[i].s[1] = rvy(revy); */
+        r[i] = 1000;
+    }
+    for (int i=0; i < xw.size(); i++)
+    {
+        xw[i][0] = 1000;
+        xw[i][1] = 1000;
+        vw[i][0] = 1;
+        vw[i][1] = 0;
+        rw[i] = 100000;
+    }
+}
+
+
+//______________________________KD Tree______________________________________// 
+//A structure to represent node of kd tree
 struct Node
 {
     float data[2]; // To store k dimensional point; // To store k dimensional data
@@ -129,29 +167,53 @@ vector<vector<float> > run(Node* root, float data[], unsigned depth, float radiu
 
 int main()
 {
-	vector<vector<float> > final(0,vector<float>(2));
+    int N=1024;
+    string input_params, output_dir = "Time";
+    int error;
+
+    int numpts, Nw, local_size, saveFreq;
+    float box_size_x, box_size_y, rho0, viscosity, velocity, total_t, dt, h;
+
+    /*readParams(input_params, output_dir, &numpts, &Nw, &box_size_x, &box_size_y,
+               &rho0, &viscosity, &velocity, &total_t,
+               &local_size, &dt, &h, &saveFreq);*/
+    numpts = 1024;
+    box_size_x = 1; box_size_y=1; rho0=100;total_t=0.1;dt=0.01;h=0.01;saveFreq=1;local_size=256;
+    velocity = 100; viscosity=0.1; Nw=1024;
+    int numrep = (total_t/dt);
+    float c0 = 10;
+    float dx = h/1.1, m = rho0 * dx * dx;
+    vector<vector<float> > x(numpts,vector<float> (2.0)), xw(Nw,vector<float> (2.0)), vw(Nw,vector<float> (2.0)), v(numpts,vector<float> (2.0));
+    vector<float> r(numpts), rw(Nw), p(numpts), pw(Nw);
+    set_ic(x, xw, v, vw, r, rw, dx, box_size_x, box_size_y);
+
+	vector<vector<float> > final(0,vector<float>(2));//The vector of nearest neighbours
 
 	struct Node *root = NULL;
-    float points[7][2] = {{3.25, 6.64}, {17.18, 15.58}, {13.14, 15.96}, {6.36, 12.58}, {9.41, 1.00}, {2.58, 7.2}, {10.12, 19.78}};
- 
+    float points[x.size()][2];
+
+    for (int i = 0; i < x.size(); ++i)
+    {
+        points[i][0]=x[i][0];
+        points[i][1]=x[i][1];
+    }
+
     int n = 7;
-    float radius = 6;
+    float radius = 2;
     for (int i=0; i<n; i++)
        root = insert(root, points[i]);
 
-    float point1[] = {3.25, 6.64};
- 	run(root, point1, 0, radius, final);
+ 	run(root, points[265], 0, radius, final);
  	
  	int end = final.size();
  	if(end == 0)
  	{
  		cout<<"No such point";
- 		return 0;
+ 		return 0;//Can be used as a condition for checking if no nearest neighbours
  	}
  	for(int i=0; i<end; i++)
  	{
- 		cout<<final[i][0]<<endl;
- 		cout<<final[i][1]<<endl;
+ 		cout<<final[i][0]<<", "<<final[i][1]<<endl;
  	}
  
     return 1;
