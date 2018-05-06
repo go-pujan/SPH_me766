@@ -360,8 +360,9 @@ void saveCheckpoint(string i, string output_dir, vector<vector<float>> &x, vecto
 }
 int main()
 {   
-    int N=1024;
-	string input_params, output_dir="Fuck_Yeah";
+    float start = clock();
+    int N=1024*2;
+	string input_params, output_dir="output";
 	int error;
 
 	int numpts, Nw, local_size, saveFreq;
@@ -370,9 +371,9 @@ int main()
     /*readParams(input_params, output_dir, &numpts, &Nw, &box_size_x, &box_size_y,
                &rho0, &viscosity, &velocity, &total_t,
                &local_size, &dt, &h, &saveFreq);*/
-    numpts = 1024;
-    box_size_x = 1; box_size_y=1; rho0=100;total_t=0.1;dt=0.0005;h=0.01;saveFreq=1;local_size=256;
-    velocity = 100; viscosity=1000; Nw=1024;
+    numpts = 1024*2;
+    box_size_x = 1; box_size_y=1; rho0=100;total_t=0.1;dt=0.01;h=0.01;saveFreq=1;local_size=256;
+    velocity = 100; viscosity=1000; Nw=1024*2;
 
 
     float c0 = 10;
@@ -380,6 +381,7 @@ int main()
     vector<vector<float> > x(numpts, vector<float> (2.0)), xw(Nw, vector<float> (2.0)), vw(Nw, vector<float> (2.0)), v(numpts, vector<float> (2.0));
     vector<float> r(numpts), rw(Nw), p(numpts), pw(Nw);
     set_ic(x, xw, v, vw, r, rw, dx, box_size_x, box_size_y);
+    float numrep = total_t/dt;
 
     //Call functions directly
     for(int j=0; j<numrep; j++)
@@ -401,6 +403,9 @@ int main()
         //cout<<"Loop iteration end: "<<j<<": "<<x[0][0]<<endl;   
     }
     saveCheckpoint("final", output_dir, x, v, r, p);
+    float end = clock();
+    float elapsed_time = (end-start) / CLOCKS_PER_SEC;
 
+    cout<<"Time required: "<<elapsed_time;
 
 }
